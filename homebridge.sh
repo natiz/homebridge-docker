@@ -4,7 +4,11 @@ BASEDIR=$(dirname $0)
 cd $BASEDIR
 
 VERSION=$(<VERSION)
-IMAGE_NAME=homebridge-v$VERSION
+IMAGE_NAME="natiz/homebridge"
+CONTAINER_NAME=HomeBridge
+
+CONTAINER_CONF_DIR="/root/.homebridge"
+HOST_CONF_DIR="/mnt/user/appdata/homebridge/config"
 
 ACTION=$1
 
@@ -16,12 +20,12 @@ fi
 
 _build() {
   # Build
-  docker build --tag="cbrandlehner/homebridge:$VERSION" .
+  docker build --tag="$IMAGE_NAME:$VERSION" .
 }
 
 _run() {
   # Run (first time)
-  docker run -d --net=host -p 51826:51826 -v /etc/homebridge:/root/.homebridge --name $IMAGE_NAME cbrandlehner/homebridge:$VERSION
+  docker run -d --net=host -p 51826:51826 -v $HOST_CONF_DIR:$CONTAINER_CONF_DIR --name $CONTAINER_NAME $IMAGE_NAME:$VERSION
 }
 
 _stop() {
@@ -54,13 +58,13 @@ _logs() {
 }
 
 _push() {
-  docker push cbrandlehner/homebridge:$VERSION
+  docker push $IMAGE_NAME:$VERSION
 }
 
 _debug() {
   # Run (first time)
   echo "please go to /root and start run.sh"
-  docker run -ti --entrypoint /bin/bash --net=host -p 51826:51826 -v /etc/homebridge:/root/.homebridge --name $IMAGE_NAME cbrandlehner/homebridge:$VERSION 
+  docker run -ti --entrypoint /bin/bash --net=host -p 51826:51826 -v $HOST_CONF_DIR:$CONTAINER_CONF_DIR --name $IMAGE_NAME $IMAGE_NAME:$VERSION 
 }
 
 eval _$ACTION
